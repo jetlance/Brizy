@@ -60,14 +60,14 @@ class Brizy_Admin_Settings {
 				'id'          => 'general',
 				'label'       => 'General',
 				'is_selected' => is_null( $selected_tab ) || $selected_tab == 'general',
-				'href'        => menu_page_url( $this->menu_slug(), false ) . "&tab=general"
+				'href'        => menu_page_url( self::menu_slug(), false ) . "&tab=general"
 
 			),
 			array(
 				'id'          => 'roles',
 				'label'       => 'Role Manager',
 				'is_selected' => $selected_tab == 'roles',
-				'href'        => menu_page_url( $this->menu_slug(), false ) . "&tab=roles"
+				'href'        => menu_page_url( self::menu_slug(), false ) . "&tab=roles"
 			)
 		);
 
@@ -124,6 +124,7 @@ class Brizy_Admin_Settings {
 				break;
 		}
 	}
+
 
 	public function general_settings_submit() {
 		$error_count        = 0;
@@ -238,6 +239,7 @@ class Brizy_Admin_Settings {
 	 * @internal
 	 */
 	function action_register_settings_page() {
+
 		add_menu_page( brizy()->get_name(),
 			brizy()->get_name(),
 			'manage_options',
@@ -246,6 +248,8 @@ class Brizy_Admin_Settings {
 			plugins_url( '/static/img/brizy-logo.svg', __FILE__ ),
 			81
 		);
+
+		add_submenu_page( self::menu_slug(), __( 'Role Manager' ), __( 'Role Manager' ), 'manage_options', "templates", array( $this, 'render' ));
 	}
 
 	/**

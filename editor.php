@@ -89,7 +89,7 @@ class Brizy_Editor {
 	}
 
 	public function default_supported_post_types() {
-		return array( 'page', 'post' );
+		return array( 'page', 'post', Brizy_Admin_Templates::CP_TEMPLATE );
 	}
 
 	public function get_name() {

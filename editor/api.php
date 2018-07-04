@@ -113,7 +113,6 @@ class Brizy_Editor_API {
 			$current_user = wp_get_current_user();
 			$form         = new Brizy_Editor_Forms_Form();
 			$form->setEmailTo( $current_user->user_email );
-
 			$this->success( $form );
 
 		} catch ( Exception $exception ) {

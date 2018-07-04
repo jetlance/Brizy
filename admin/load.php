@@ -3,6 +3,16 @@
 }
 
 add_action( 'wp_loaded', 'brizy_load_admin' );
+add_action( 'init', 'brizy_init_templates' );
+
+
+function brizy_init_templates() {
+	try {
+		Brizy_Admin_Templates::_init();
+	} catch ( Exception $e ) {
+		// ignore this exceptions for now.
+	}
+}
 
 
 function brizy_add_dashboard_widgets() {
