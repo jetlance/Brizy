@@ -1,0 +1,42 @@
+<div class="brizy-template-rules">
+    <h4>New Rule</h4>
+    <input type="hidden" id="rule-reload-action" name="reload" value="{{ reload_action }}">
+    <div class="new-rule">
+        <input type="hidden" name="hash" value="{{ nonce }}">
+        <input type="hidden" name="postId" value="{{ templateId }}">
+        <select name="brizy-rule-type" class="rule-field">
+            <option value="1">Include</option>
+            <option value="2">Exclude</option>
+        </select>
+        <select name="brizy-apply-to" class="rule-field">
+            <option value="1_post">Posts</option>
+            <option value="1_page">Pages</option>
+            <option value="2_category">Categories</option>
+            <option value="3_404">404</option>
+        </select>
+        <input name="brizy-entities" class="rule-field" value="{{ rule.getEntitiesAsString() }}"/>
+        <input type="button" value="Create" onclick="createTemplateRule(this)" data-action="{{ submit_action }}"/>
+    </div>
+    <h4>Rules</h4>
+    {% for rule in rules %}
+        {% set rule_delete_action = (delete_action ~ '&ruleId=' ~ rule.id) %}
+        <div class="rule">
+            <input type="hidden" name="brizy-rule-id[]" value="{{ rule.id }}">
+            <select name="brizy-rule-type[]"  disabled>
+                <option value="1" {{ (rule.type==1) ? 'selected' : '' }}>Include</option>
+                <option value="2" {{ (rule.type==2) ? 'selected' : '' }}>Exclude</option>
+            </select>
+            <select name="brizy-apply-to[]"  disabled>
+                <option {{ (rule.appliedFor==1 and rule.entityType=='post' ) ? 'selected' : '' }} value="1_post">Posts</option>
+                <option {{ (rule.appliedFor==1 and rule.entityType=='page') ? 'selected' : '' }} value="1_page">Pages</option>
+                <option {{ (rule.appliedFor==2) ? 'selected' : '' }} value="2_category">Categories</option>
+                <option {{ (rule.appliedFor==3) ? 'selected' : '' }} value="3_404">404</option>
+            </select>
+
+            <input name="brizy-entities[]" value="{{ rule.getEntitiesAsString() }}" readonly/>
+            <input type="button" value="-" onclick="deleteTemplateRule(this)" data-action="{{ rule_delete_action }}"/>
+        </div>
+    {% else %}
+        <p>No rules created</p>
+    {% endfor %}
+</div>

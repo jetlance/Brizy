@@ -2,18 +2,20 @@
 	die( 'Direct access forbidden.' );
 }
 
-add_action( 'wp_loaded', 'brizy_load_admin' );
 add_action( 'init', 'brizy_init_templates' );
-
+add_action( 'wp_loaded', 'brizy_load_admin' );
 
 function brizy_init_templates() {
 	try {
+		if ( current_user_can( Brizy_Admin_Capabilities::CAP_EDIT_WHOLE_PAGE ) ) {
+			Brizy_Admin_Rules_Api::_init();
+		}
+
 		Brizy_Admin_Templates::_init();
 	} catch ( Exception $e ) {
 		// ignore this exceptions for now.
 	}
 }
-
 
 function brizy_add_dashboard_widgets() {
 	try {

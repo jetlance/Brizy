@@ -198,7 +198,7 @@ class Brizy_Editor_Post extends Brizy_Admin_Serializable {
 
 		if ( ! in_array( $type, $supported_post_types ) ) {
 			throw new Brizy_Editor_Exceptions_UnsupportedPostType(
-				"Brizy editor doesn't support '{$type}' post type 1"
+				"Brizy editor doesn't support '{$type}' post type"
 			);
 		}
 	}

@@ -56,7 +56,6 @@ class Brizy_Admin_Main {
 		add_filter( 'save_post', array( $this, 'save_post' ), 10, 2 );
 		add_action( 'wp_restore_post_revision', array( $this, 'restore_revision' ), 10, 2 );
 
-
 		if ( function_exists( 'gutenberg_init' ) ) {
 			add_action( 'admin_print_scripts-edit.php', array( $this, 'add_edit_button_to_gutenberg' ), 12 );
 		}
@@ -294,7 +293,9 @@ class Brizy_Admin_Main {
 	 * @internal
 	 **/
 	public function action_add_enable_disable_buttons() {
-		if ( in_array( get_post_type(), brizy()->supported_post_types() ) ) {
+		$get_post_type = get_post_type();
+		$supported_post_types = brizy()->supported_post_types();
+		if ( in_array( $get_post_type, $supported_post_types ) ) {
 			$p = get_post();
 
 			try {

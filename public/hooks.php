@@ -59,6 +59,7 @@ function brizy_initialize_front_end_Brizy_Public_Main() {
 	}
 }
 
+
 function brizy_initialize_admin_edit_Brizy_Public_Main() {
 
 	if ( ! is_user_logged_in() ) {
