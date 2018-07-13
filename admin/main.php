@@ -16,12 +16,20 @@ class Brizy_Admin_Main {
 		return $instance;
 	}
 
+	/**
+	 * Brizy_Admin_Main constructor.
+	 */
 	protected function __construct() {
 
 		if ( ! Brizy_Editor::is_user_allowed() ) {
 			return;
 		}
 
+		// watch all supported posts and create meta revisions
+		$metaManager = new Brizy_Admin_Post_RevisionManager();
+		$metaManager->addMonitor( new Brizy_Admin_Post_BrizyPostsMonitor() );
+
+		// enqueue admin scripts
 		add_action( 'admin_enqueue_scripts', array( $this, 'action_register_static' ) );
 
 		if ( current_user_can( Brizy_Admin_Capabilities::CAP_EDIT_WHOLE_PAGE ) || Brizy_Editor::is_administrator() ) {
@@ -54,13 +62,15 @@ class Brizy_Admin_Main {
 		add_filter( 'display_post_states', array( $this, 'display_post_states' ), 10, 2 );
 
 		add_filter( 'save_post', array( $this, 'save_post' ), 10, 2 );
-		add_action( 'wp_restore_post_revision', array( $this, 'restore_revision' ), 10, 2 );
 
 		if ( function_exists( 'gutenberg_init' ) ) {
 			add_action( 'admin_print_scripts-edit.php', array( $this, 'add_edit_button_to_gutenberg' ), 12 );
 		}
 	}
 
+	/**
+	 * @param int $post
+	 */
 	public function action_delete_page( $post = null ) {
 		try {
 
@@ -114,25 +124,12 @@ class Brizy_Admin_Main {
 				$brizy_post = Brizy_Editor_Post::get( $parent_id );
 
 				if ( $brizy_post->uses_editor() ) {
-					$brizy_post->save_revision( $post_id );
+					$brizy_post->save( $post_id );
 				}
 			}
 
 		} catch ( Exception $e ) {
 			Brizy_Logger::instance()->exception( $e );
-
-			return;
-		}
-	}
-
-	public function restore_revision( $post_id, $revision_id ) {
-
-		try {
-			$post = Brizy_Editor_Post::get( $post_id );
-			if ( $post->uses_editor() ) {
-				$post->restore_from_revision( $revision_id );
-			}
-		} catch ( Exception $e ) {
 
 			return;
 		}
