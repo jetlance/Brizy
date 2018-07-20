@@ -46,7 +46,9 @@ class Brizy_Admin_Templates {
 			add_action( 'wp_ajax_' . self::RULE_LIST_VEIW, array( $this, 'getTemplateRuleBox' ) );
 		} else {
 			add_action( 'wp', array( $this, 'templateFrontEnd' ) );
+			add_action( 'template_include', array( $this, 'templateInclude' ) );
 		}
+
 
 		$this->ruleManager = new Brizy_Admin_Rules_Manager();
 	}
@@ -187,6 +189,7 @@ class Brizy_Admin_Templates {
 
 		$is_using_brizy = false;
 		try {
+		    $pid =get_queried_object_id();
 			$is_using_brizy = Brizy_Editor_Post::get( $pid )->uses_editor();
 		} catch ( Exception $e ) {
 		}
@@ -209,8 +212,6 @@ class Brizy_Admin_Templates {
 				add_action( 'wp_head', array( $this, 'insertPageHead' ) );
 				add_filter( 'the_content', array( $this, 'insertPageContent' ), - 10000 );
 			}
-
-			add_action( 'template_include', array( $this, 'templateInclude' ) );
 
 		} catch ( Exception $e ) {
 			//ignore
