@@ -85,7 +85,7 @@ class Brizy_Admin_Templates {
 				'hierarchical'        => false,
 				'show_in_rest'        => false,
 				'exclude_from_search' => false,
-				'supports'            => array( 'title', 'author', 'thumbnail' )
+				'supports'            => array( 'title', 'author', 'thumbnail','revisions' )
 			)
 		);
 	}
