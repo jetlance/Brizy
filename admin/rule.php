@@ -114,6 +114,7 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 	public function setId( $id ) {
 
 		$this->id = $id;
+
 		return $this;
 	}
 
@@ -213,7 +214,13 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 	 * @return Brizy_Admin_Rule|void
 	 */
 	static public function createFromSerializedData( $data ) {
-		return new self( $data['id'], $data['type'], $data['applied_for'], $data['entity_type'], $data['entities'] );
+		return new self(
+			isset( $data['id'] ) ? $data['id'] : null,
+			isset( $data['type'] ) ? $data['type'] : null,
+			isset( $data['applied_for'] ) ? $data['applied_for'] : null,
+			isset( $data['entity_type'] ) ? $data['entity_type'] : null,
+			isset( $data['entities'] ) ? $data['entities'] : null
+		);
 	}
 
 	/**
