@@ -42,8 +42,11 @@ class Brizy_Admin_Templates {
 
 		// do other stuff here
 		if ( is_admin() ) {
+			add_filter( 'post_updated_messages', array( $this, 'filterTemplateMessages' ) );
 			add_action( 'add_meta_boxes', array( $this, 'registerTemplateMetaBox' ) );
 			add_action( 'wp_ajax_' . self::RULE_LIST_VEIW, array( $this, 'getTemplateRuleBox' ) );
+			add_filter( 'post_row_actions', array( $this, 'removeRowActions' ), 10, 1 );
+
 		} else {
 			add_action( 'wp', array( $this, 'templateFrontEnd' ) );
 			add_action( 'template_include', array( $this, 'templateInclude' ) );
@@ -66,13 +69,75 @@ class Brizy_Admin_Templates {
 		return $instance;
 	}
 
+	/**
+	 * @param $messages
+	 *
+	 * @return mixed
+	 */
+	function filterTemplateMessages( $messages ) {
+		$post             = get_post();
+		$post_type        = get_post_type( $post );
+		$post_type_object = get_post_type_object( $post_type );
+
+		$messages[ self::CP_TEMPLATE ] = array(
+			0  => '', // Unused. Messages start at index 1.
+			1  => __( 'Template updated.' ),
+			2  => __( 'Custom field updated.' ),
+			3  => __( 'Custom field deleted.' ),
+			4  => __( 'Template updated.' ),
+			/* translators: %s: date and time of the revision */
+			5  => isset( $_GET['revision'] ) ? sprintf( __( 'Template restored to revision from %s' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6  => __( 'Template published.' ),
+			7  => __( 'Template saved.' ),
+			8  => __( 'Template submitted.' ),
+			9  => sprintf(
+				__( 'Template scheduled for: <strong>%1$s</strong>.' ),
+				// translators: Publish box date format, see http://php.net/date
+				date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) )
+			),
+			10 => __( 'Template draft updated.' )
+		);
+
+		if ( $post_type_object->publicly_queryable && 'Template' === $post_type ) {
+			$permalink = get_permalink( $post->ID );
+
+			$view_link                 = sprintf( ' <a href="%s">%s</a>', esc_url( $permalink ), __( 'View Template' ) );
+			$messages[ $post_type ][1] .= $view_link;
+			$messages[ $post_type ][6] .= $view_link;
+			$messages[ $post_type ][9] .= $view_link;
+
+			$preview_permalink          = add_query_arg( 'preview', 'true', $permalink );
+			$preview_link               = sprintf( ' <a target="_blank" href="%s">%s</a>', esc_url( $preview_permalink ), __( 'Preview Template' ) );
+			$messages[ $post_type ][8]  .= $preview_link;
+			$messages[ $post_type ][10] .= $preview_link;
+		}
+
+		return $messages;
+	}
+
 	public function registerCustomPostTemplate() {
+
+
+		$labels = array(
+			'name'               => _x( 'Templates', 'post type general name' ),
+			'singular_name'      => _x( 'Template', 'post type singular name' ),
+			'menu_name'          => _x( 'Templates', 'admin menu' ),
+			'name_admin_bar'     => _x( 'Template', 'add new on admin bar' ),
+			'add_new'            => _x( 'Add New', self::CP_TEMPLATE ),
+			'add_new_item'       => __( 'Add New Template' ),
+			'new_item'           => __( 'New Template' ),
+			'edit_item'          => __( 'Edit Template' ),
+			'view_item'          => __( 'View Template' ),
+			'all_items'          => __( 'All Templates' ),
+			'search_items'       => __( 'Search Templates' ),
+			'parent_item_colon'  => __( 'Parent Templates:' ),
+			'not_found'          => __( 'No Templates found.' ),
+			'not_found_in_trash' => __( 'No Templates found in Trash.' )
+		);
+
 		register_post_type( self::CP_TEMPLATE,
 			array(
-				'labels'              => array(
-					'name'          => __( 'Templates' ),
-					'singular_name' => __( 'Template' )
-				),
+				'labels'              => $labels,
 				'public'              => false,
 				'has_archive'         => false,
 				'description'         => __( 'Brizy templates.' ),
@@ -85,7 +150,7 @@ class Brizy_Admin_Templates {
 				'hierarchical'        => false,
 				'show_in_rest'        => false,
 				'exclude_from_search' => false,
-				'supports'            => array( 'title', 'author', 'thumbnail','revisions' )
+				'supports'            => array( 'title', 'revisions' )
 			)
 		);
 	}
@@ -94,22 +159,31 @@ class Brizy_Admin_Templates {
 		add_meta_box( 'template-rules', __( 'Rules' ), array( $this, 'templateRulesBox' ), self::CP_TEMPLATE );
 	}
 
+	public function removeRowActions( $actions ) {
+		if ( get_post_type() === self::CP_TEMPLATE ) {
+			unset( $actions['view'] );
+		}
+
+		return $actions;
+	}
+
 	public function templateRulesBox() {
 		try {
 
-			$templateId = null;
+			$templateId = isset( $_REQUEST['post'] ) ? (int) $_REQUEST['post'] : get_the_ID();
 
-			$rules = array();
-			if ( isset( $_GET['post'] ) ) {
-				$templateId = (int) $_GET['post'];
-				$rules      = $this->ruleManager->getRules( $templateId );
+			if ( ! $templateId ) {
+				throw new Exception();
 			}
+
+			$rules = $this->ruleManager->getRules( $templateId );
+
 			$nonce   = wp_create_nonce( Brizy_Editor_API::nonce );
 			$context = array(
 				'rules'         => $rules,
 				'types'         => array(),
 				'apply_for'     => array(),
-				'templateId'    => $_GET['post'],
+				'templateId'    => $templateId,
 				'reload_action' => admin_url( 'admin-ajax.php?action=' . self::RULE_LIST_VEIW . '&post=' . $templateId . '&hash=' . $nonce ),
 				'submit_action' => admin_url( 'admin-ajax.php?action=' . Brizy_Admin_Rules_Api::CREATE_RULE_ACTION ),
 				'delete_action' => admin_url( 'admin-ajax.php?action=' . Brizy_Admin_Rules_Api::DELETE_RULE_ACTION . '&postId=' . $templateId . '&hash=' . $nonce ),
@@ -120,15 +194,14 @@ class Brizy_Admin_Templates {
 			                     ->render( 'rules-box.html.twig', $context );
 		} catch ( Exception $e ) {
 			Brizy_Logger::instance()->error( $e->getMessage(), array( 'exception' => $e ) );
-			echo $e->getMessage();
-			?>Unable to show the rule box.<?
+			?>Unable to show the rule box.<?php
 		}
 	}
 
 	public function getTemplateRuleBox() {
-	    $this->templateRulesBox();
-	    exit;
-    }
+		$this->templateRulesBox();
+		exit;
+	}
 
 
 	public function templateInclude( $template ) {
@@ -189,7 +262,7 @@ class Brizy_Admin_Templates {
 
 		$is_using_brizy = false;
 		try {
-		    $pid =get_queried_object_id();
+			$pid            = get_queried_object_id();
 			$is_using_brizy = Brizy_Editor_Post::get( $pid )->uses_editor();
 		} catch ( Exception $e ) {
 		}

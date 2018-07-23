@@ -19,8 +19,10 @@ class Brizy_Admin_Rules_Manager {
 
 		$meta_value = get_post_meta( (int) $postId, 'brizy-template-rules', true );
 
-		foreach ( $meta_value as $v ) {
-			$rules[] = Brizy_Admin_Rule::createFromSerializedData( $v );
+		if ( is_array($meta_value) && count( $meta_value ) ) {
+			foreach ( $meta_value as $v ) {
+				$rules[] = Brizy_Admin_Rule::createFromSerializedData( $v );
+			}
 		}
 
 		return $rules;
@@ -87,4 +89,22 @@ class Brizy_Admin_Rules_Manager {
 		return new Brizy_Admin_RuleSet( $this->getRules( $postId ) );
 	}
 
+	public function getAllRulesSet() {
+		$templates = get_posts( array(
+			'post_type'      => Brizy_Admin_Templates::CP_TEMPLATE,
+			'numberposts'    => - 1,
+			'posts_per_page' => - 1
+		) );
+
+		$rules = array();
+
+		foreach ( $templates as $template ) {
+			$tRules = $this->getRules( $template->ID );
+			$rules  = array_merge( $rules, $tRules );
+		}
+
+		$ruleSet = new Brizy_Admin_RuleSet( $rules );
+
+		return $ruleSet;
+	}
 }

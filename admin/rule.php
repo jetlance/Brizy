@@ -62,7 +62,7 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 		$this->setType( $type );
 		$this->setAppliedFor( $applied_for );
 		$this->setEntityType( $entity_type );
-		$this->setEntities( array_filter( $entities, array( $this, 'filter' ) ) );
+		$this->setEntities( array_filter( (array)$entities, array( $this, 'filter' ) ) );
 		$this->setId( $this->generateId( $type, $applied_for, $entity_type, $this->getEntitiesAsString() ) );
 	}
 

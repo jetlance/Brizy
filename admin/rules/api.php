@@ -71,7 +71,7 @@ class Brizy_Admin_Rules_Api {
 			), 400 );
 		}
 
-		$postId = (int) $_POST['postId'];
+		$postId = (int) $_POST['post_ID'];
 
 		if ( ! $postId ) {
 			return wp_send_json_error( (object) array( 'message' => 'Invalid template' ), 400 );
@@ -86,7 +86,7 @@ class Brizy_Admin_Rules_Api {
 		}
 
 		// validate rule
-		$ruleSet = $this->manager->getRuleSet( $postId );
+		$ruleSet = $this->manager->getAllRulesSet(  );
 
 		foreach ( $ruleSet->getRules() as $arule ) {
 			if ( $rule->isOverriddenBy( $arule ) ) {
