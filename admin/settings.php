@@ -29,7 +29,7 @@ class Brizy_Admin_Settings {
 	 */
 	private function __construct() {
 
-		add_action( 'admin_menu', array( $this, 'action_register_settings_page' ) );
+		add_action( 'admin_menu', array( $this, 'action_register_settings_page' ), 9 );
 		add_action( 'current_screen', array( $this, 'action_validate_form_submit' ) );
 		add_action( 'brizy_settings_role_capability_row', array( $this, 'role_capability_select_row' ) );
 		add_action( 'brizy_settings_post_type_row', array( $this, 'post_type_row' ) );
@@ -63,7 +63,7 @@ class Brizy_Admin_Settings {
 			81
 		);
 
-		add_submenu_page( self::menu_slug(), __( 'Role Manager' ), __( 'Role Manager' ), 'manage_options', "brizy-settings", array( $this, 'render' ));
+		add_submenu_page( self::menu_slug(), __( 'Role Manager' ), __( 'Role Manager' ), 'manage_options', self::menu_slug(), array( $this, 'render' ));
 	}
 
 	private function get_selected_tab() {
