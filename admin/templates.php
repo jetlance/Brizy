@@ -128,7 +128,7 @@ class Brizy_Admin_Templates {
 			'new_item'           => __( 'New Template' ),
 			'edit_item'          => __( 'Edit Template' ),
 			'view_item'          => __( 'View Template' ),
-			'all_items'          => __( 'All Templates' ),
+			'all_items'          => __( 'Templates' ),
 			'search_items'       => __( 'Search Templates' ),
 			'parent_item_colon'  => __( 'Parent Templates:' ),
 			'not_found'          => __( 'No Templates found.' ),
