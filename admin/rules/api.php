@@ -61,6 +61,8 @@ class Brizy_Admin_Rules_Api {
 		$rules = $this->manager->getRules( $postId );
 
 		wp_send_json_success( $rules, 200 );
+
+		return null;
 	}
 
 	public function actionCreateRule() {
@@ -107,6 +109,8 @@ class Brizy_Admin_Rules_Api {
 		$this->manager->addRule( $postId, $rule );
 
 		wp_send_json_success( $rule, 200 );
+
+		return null;
 	}
 
 	public function actionDeleteRule() {

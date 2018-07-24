@@ -734,7 +734,7 @@ class Brizy_Editor_API {
 			$links[] = (object) array( 'label' => $label, 'url' => $permalink, 'post_type' => $post->post_type );
 		}
 
-		remove_filter( 'posts_where', 'brizy_post_title_filter', 10, 2 );
+		remove_filter( 'posts_where', 'brizy_post_title_filter', 10);
 
 		return $links;
 	}

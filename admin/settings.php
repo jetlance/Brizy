@@ -63,7 +63,10 @@ class Brizy_Admin_Settings {
 			81
 		);
 
-		add_submenu_page( self::menu_slug(), __( 'Role Manager' ), __( 'Role Manager' ), 'manage_options', self::menu_slug(), array( $this, 'render' ));
+		add_submenu_page( self::menu_slug(), __( 'Role Manager' ), __( 'Role Manager' ), 'manage_options', self::menu_slug(), array(
+			$this,
+			'render'
+		) );
 	}
 
 	private function get_selected_tab() {
@@ -90,8 +93,8 @@ class Brizy_Admin_Settings {
 		return apply_filters( 'brizy_settings_tabs', $tabs );
 	}
 
-	private function get_tab_content() {
-		switch ( $this->get_selected_tab() ) {
+	private function get_tab_content( $tab ) {
+		switch ( $tab ) {
 			default:
 			case 'general':
 				return $this->get_general_tab();
@@ -100,8 +103,6 @@ class Brizy_Admin_Settings {
 				return $this->get_roles_tab();
 				break;
 		}
-
-		return '';
 	}
 
 	private function get_general_tab() {
