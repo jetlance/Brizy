@@ -43,7 +43,7 @@ class Brizy_Admin_Templates {
 		// do other stuff here
 		if ( is_admin() ) {
 			add_filter( 'post_updated_messages', array( $this, 'filterTemplateMessages' ) );
-			add_action( 'add_meta_boxes', array( $this, 'registerTemplateMetaBox' ) );
+			add_action( 'add_meta_boxes', array( $this, 'registerTemplateMetaBox' ),9 );
 			add_action( 'wp_ajax_' . self::RULE_LIST_VEIW, array( $this, 'getTemplateRuleBox' ) );
 			add_filter( 'post_row_actions', array( $this, 'removeRowActions' ), 10, 1 );
 
@@ -156,7 +156,7 @@ class Brizy_Admin_Templates {
 	}
 
 	public function registerTemplateMetaBox() {
-		add_meta_box( 'template-rules', __( 'Rules' ), array( $this, 'templateRulesBox' ), self::CP_TEMPLATE );
+		add_meta_box( 'template-rules', __( 'Rules' ), array( $this, 'templateRulesBox' ), self::CP_TEMPLATE, 'normal','high' );
 	}
 
 	public function removeRowActions( $actions ) {
