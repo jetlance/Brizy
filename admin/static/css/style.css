@@ -105,3 +105,22 @@
   background-color: #fff;
   box-shadow: 0px 2px 0px 0px #e3e3e3;
 }
+.brizy-template-rules input[type="text"] {
+  vertical-align: middle;
+  height: 28px;
+  line-height: 28px;
+  border-radius: 5px;
+}
+.brizy-template-rules .rule:not(:first-of-type) {
+  margin-top: 10px;
+}
+.brizy-delete-rule {
+  border: 0;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.brizy-delete-rule:active,
+.brizy-delete-rule:focus {
+  outline: 0;
+}
