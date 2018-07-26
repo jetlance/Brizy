@@ -156,7 +156,7 @@ class Brizy_Admin_Templates {
 	}
 
 	public function registerTemplateMetaBox() {
-		add_meta_box( 'template-rules', __( 'Rules' ), array( $this, 'templateRulesBox' ), self::CP_TEMPLATE, 'normal','high' );
+		add_meta_box( 'template-rules', __( 'Display Conditions' ), array( $this, 'templateRulesBox' ), self::CP_TEMPLATE, 'normal','high' );
 	}
 
 	public function removeRowActions( $actions ) {
