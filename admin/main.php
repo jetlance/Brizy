@@ -200,13 +200,34 @@ class Brizy_Admin_Main {
 	 * @internal
 	 */
 	public function action_register_static() {
-		if ( ! in_array( get_post_type(), brizy()->supported_post_types() ) ) {
-			return;
-		}
 
 		wp_enqueue_style(
-			brizy()->get_slug() . '-admin-js',
+			brizy()->get_slug() . '-admin-css',
 			brizy()->get_url( 'admin/static/css/style.css' )
+		);
+		wp_enqueue_style(
+			brizy()->get_slug() . '-select2',
+			'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css'
+		);
+		wp_enqueue_script(
+			brizy()->get_slug() . '-hyperapp-js',
+			brizy()->get_url( 'admin/static/js/hyperapp.js' ),
+			array( 'jquery', 'underscore' ),
+			brizy()->get_version(),
+			true
+		);
+
+		wp_enqueue_script(
+			brizy()->get_slug() . '-select2',
+			'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js',
+			array( 'jquery' )
+		);
+		wp_enqueue_script(
+			brizy()->get_slug() . '-rules',
+			brizy()->get_url( 'admin/static/js/rules.js' ),
+			array( brizy()->get_slug() . '-hyperapp-js' ),
+			brizy()->get_version(),
+			true
 		);
 		wp_enqueue_script(
 			brizy()->get_slug() . '-admin-js',
@@ -290,7 +311,7 @@ class Brizy_Admin_Main {
 	 * @internal
 	 **/
 	public function action_add_enable_disable_buttons() {
-		$get_post_type = get_post_type();
+		$get_post_type        = get_post_type();
 		$supported_post_types = brizy()->supported_post_types();
 		if ( in_array( $get_post_type, $supported_post_types ) ) {
 			$p = get_post();
