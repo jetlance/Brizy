@@ -105,7 +105,7 @@
   background-color: #fff;
   box-shadow: 0px 2px 0px 0px #e3e3e3;
 }
-.brizy-template-rules input[type="text"] {
+.brizy-template-rules input[type="text"], select {
   vertical-align: middle;
   height: 28px;
   line-height: 28px;
@@ -119,6 +119,7 @@
   font-size: 13px;
   text-decoration: underline;
   cursor: pointer;
+  background: none;
 }
 .brizy-delete-rule:active,
 .brizy-delete-rule:focus {
