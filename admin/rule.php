@@ -29,19 +29,19 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 	/**
 	 * @var int
 	 */
-	private $applied_for;
+	private $appliedFor;
 
 	/**
 	 * @var string
 	 */
-	private $entity_type;
+	private $entityType;
 
 	/**
 	 * If null the rule will be applied on all entities
 	 *
 	 * @var int[]
 	 */
-	private $entities = null;
+	private $entityValues = array();
 
 	/**
 	 * @return array|mixed
@@ -60,10 +60,11 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 	 * @param array $entities
 	 */
 	public function __construct( $id, $type, $applied_for, $entity_type, $entities ) {
+		$this->setId( $id );
 		$this->setType( $type );
 		$this->setAppliedFor( $applied_for );
 		$this->setEntityType( $entity_type );
-		$this->setEntities( array_filter( (array) $entities, array( $this, 'filter' ) ) );
+		$this->setEntityValues( array_filter( (array) $entities, array( $this, 'filter' ) ) );
 		$this->setId( $this->generateId( $type, $applied_for, $entity_type, $this->getEntitiesAsString() ) );
 	}
 
@@ -79,25 +80,42 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 	 *
 	 * @return bool
 	 */
-	public function isGranted( $applied_for, $entity = null ) {
+	public function isGranted( $applyFor, $entityType, $entityValues ) {
 
-		$applies = $this->getAppliedFor() == $applied_for;
+		$ruleValues = array_filter( array(
+			$this->getType(),
+			$this->getAppliedFor(),
+			$this->getEntityType(),
+			$this->getEntityValues(),
+		),function($v) { return !empty($v); } );
 
-		if ( empty( $this->entities ) ) {
-			$applies_for_id = true;
-		} else {
-			$applies_for_id = ! is_null( $entity ) ? in_array( $entity, $this->getEntities() ) : true;
+		$checkValues = array(
+			self::TYPE_INCLUDE,
+			$applyFor,
+			$entityType,
+			$entityValues,
+		);
+
+		foreach ( $ruleValues as $i => $value ) {
+
+			if (  is_array( $value ) ) {
+				// this means that the rull accept any value
+				if(count($ruleValues[ $i ])==0)
+					return true;
+
+				// check if the value is contained in this rule
+				if ( count( array_diff( $checkValues[ $i ], $ruleValues[ $i ] ) ) != 0 ) {
+					return false;
+				}
+
+			} else {
+				if ( $ruleValues[ $i ] != $checkValues[ $i ] ) {
+					return false;
+				}
+			}
 		}
 
-		if ( ! ( $applies && $applies_for_id ) ) {
-			return false;
-		}
-
-		if ( $this->getType() === self::TYPE_INCLUDE ) {
-			return true;
-		}
-
-		return false;
+		return true;
 	}
 
 	/**
@@ -141,16 +159,16 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 	 * @return int
 	 */
 	public function getAppliedFor() {
-		return $this->applied_for;
+		return $this->appliedFor;
 	}
 
 	/**
-	 * @param int $applied_for
+	 * @param int $appliedFor
 	 *
 	 * @return Brizy_Admin_Rule
 	 */
-	public function setAppliedFor( $applied_for ) {
-		$this->applied_for = $applied_for;
+	public function setAppliedFor( $appliedFor ) {
+		$this->appliedFor = $appliedFor;
 
 		return $this;
 	}
@@ -159,39 +177,39 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 	 * @return string
 	 */
 	public function getEntityType() {
-		return $this->entity_type;
+		return $this->entityType;
 	}
 
 	/**
-	 * @param string $entity_type
+	 * @param string $entityType
 	 *
 	 * @return Brizy_Admin_Rule
 	 */
-	public function setEntityType( $entity_type ) {
-		$this->entity_type = $entity_type;
+	public function setEntityType( $entityType ) {
+		$this->entityType = $entityType;
 
 		return $this;
 	}
 
 	/**
-	 * @return int[]
+	 * @return string[]
 	 */
-	public function getEntities() {
-		return is_null( $this->entities ) ? array() : $this->entities;
+	public function getEntityValues() {
+		return is_null( $this->entityValues ) ? array() : $this->entityValues;
 	}
 
 	/**
-	 * @param int[] $entities
+	 * @param int[] $entityValues
 	 *
 	 * @return Brizy_Admin_Rule
 	 */
-	public function setEntities( $entities ) {
+	public function setEntityValues( $entityValues ) {
 
-		if ( ! is_array( $entities ) ) {
+		if ( ! is_array( $entityValues ) ) {
 			throw new InvalidArgumentException();
 		}
 
-		$this->entities = $entities;
+		$this->entityValues = $entityValues;
 
 		return $this;
 	}
@@ -201,11 +219,11 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 	 */
 	public function convertToOptionValue() {
 		return array(
-			'id'          => $this->getId(),
-			'type'        => $this->getType(),
-			'applied_for' => $this->getAppliedFor(),
-			'entity_type' => $this->getEntityType(),
-			'entities'    => $this->getEntities(),
+			'id'           => $this->getId(),
+			'type'         => $this->getType(),
+			'appliedFor'   => $this->getAppliedFor(),
+			'entityType'   => $this->getEntityType(),
+			'entityValues' => $this->getEntityValues(),
 		);
 	}
 
@@ -218,9 +236,24 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 		return new self(
 			isset( $data['id'] ) ? $data['id'] : null,
 			isset( $data['type'] ) ? $data['type'] : null,
-			isset( $data['applied_for'] ) ? $data['applied_for'] : null,
-			isset( $data['entity_type'] ) ? $data['entity_type'] : null,
-			isset( $data['entities'] ) ? $data['entities'] : null
+			isset( $data['appliedFor'] ) ? $data['appliedFor'] : null,
+			isset( $data['entityType'] ) ? $data['entityType'] : null,
+			isset( $data['entityValues'] ) ? $data['entityValues'] : null
+		);
+	}
+
+	/**
+	 * @param $data
+	 *
+	 * @return Brizy_Admin_Rule|void
+	 */
+	static public function createFromRequestData( $data ) {
+		return new self(
+			isset( $data['id'] ) ? $data['id'] : null,
+			isset( $data['type'] ) ? $data['type'] : null,
+			isset( $data['appliedFor'] ) ? $data['appliedFor'] : null,
+			isset( $data['entityType'] ) ? $data['entityType'] : null,
+			isset( $data['entityValues'] ) ? $data['entityValues'] : null
 		);
 	}
 
@@ -234,7 +267,7 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 		return $this->getType() == $rule->getType() &&
 		       $this->getAppliedFor() == $rule->getAppliedFor() &&
 		       $this->getEntityType() == $rule->getEntityType() &&
-		       ( empty( $rule->getEntities() ) || count( array_diff( $rule->getEntities(), $this->getEntities() ) ) == 0 );
+		       ( count( $rule->getEntityValues() ) || count( array_diff( $rule->getEntityValues(), $this->getEntityValues() ) ) == 0 );
 	}
 
 	/**
@@ -243,7 +276,7 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 	 * @return string
 	 */
 	public function getEntitiesAsString( $delimited = ',' ) {
-		return implode( $delimited, $this->getEntities() );
+		return implode( $delimited, $this->getEntityValues() );
 	}
 
 	/**

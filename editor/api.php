@@ -381,7 +381,7 @@ class Brizy_Editor_API {
 			$posts = Brizy_Editor_Post::get_all_brizy_posts();
 
 			// we need to trigger a post update action to make sure the cache plugins will update clear the cache
-			remove_action( 'save_post', array( Brizy_Admin_Main::_init(), 'compile_post_action' ) );
+			remove_action( 'save_post', array( Brizy_Admin_Main::instance(), 'compile_post_action' ) );
 			// mark all post to be compiled on next view
 			foreach ( $posts as $bpost ) {
 				$bpost->set_needs_compile( true );

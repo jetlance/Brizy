@@ -7,8 +7,9 @@
  */
 
 
-class Brizy_Admin_Rules_Api {
+class Brizy_Admin_Rules_Api extends Brizy_Admin_AbstractApi {
 
+	const nonce = 'brizy-rule-api';
 	const CREATE_RULE_ACTION = 'brizy_add_rule';
 	const DELETE_RULE_ACTION = 'brizy_delete_rule';
 	const LIST_RULE_ACTION = 'brizy_list_rules';
@@ -18,6 +19,17 @@ class Brizy_Admin_Rules_Api {
 	 */
 	private $manager;
 
+
+	/**
+	 * Brizy_Admin_Rules_Api constructor.
+	 *
+	 * @param Brizy_Admin_Rules_Manager $manager
+	 */
+	public function __construct( $manager ) {
+		$this->manager = $manager;
+
+		parent::__construct();
+	}
 
 	/**
 	 * @return Brizy_Admin_Rules_Api
@@ -32,27 +44,25 @@ class Brizy_Admin_Rules_Api {
 		return $instance;
 	}
 
-	/**
-	 * Brizy_Admin_Rules_Api constructor.
-	 *
-	 * @param Brizy_Admin_Rules_Manager $manager
-	 */
-	public function __construct( $manager ) {
-		$this->manager = $manager;
+	protected function getRequestNonce() {
+		return $this->param( 'hash' );
+	}
+
+	protected function initializeApiActions() {
 		add_action( 'wp_ajax_' . self::CREATE_RULE_ACTION, array( $this, 'actionCreateRule' ) );
 		add_action( 'wp_ajax_' . self::DELETE_RULE_ACTION, array( $this, 'actionDeleteRule' ) );
 		add_action( 'wp_ajax_' . self::LIST_RULE_ACTION, array( $this, 'actionGetRuleList' ) );
 	}
 
+
+	/**
+	 * @return null|void
+	 */
 	public function actionGetRuleList() {
 
-		if ( ! wp_verify_nonce( $_REQUEST['hash'], Brizy_Editor_API::nonce ) ) {
-			wp_send_json_error( (object) array(
-				'message' => 'Invalid request',
-			), 400 );
-		}
+		$this->verifyNonce( self::nonce );
 
-		$postId = (int) $_GET['postId'];
+		$postId = (int) $this->param( 'post' );
 
 		if ( ! $postId ) {
 			return wp_send_json_error( (object) array( 'message' => 'Invalid template' ), 400 );
@@ -67,28 +77,19 @@ class Brizy_Admin_Rules_Api {
 
 	public function actionCreateRule() {
 
-		if ( ! wp_verify_nonce( $_REQUEST['hash'], Brizy_Editor_API::nonce ) ) {
-			wp_send_json_error( (object) array(
-				'message' => 'Invalid request',
-			), 400 );
-		}
+		$this->verifyNonce( self::nonce );
 
-		$postId = (int) $_POST['post_ID'];
+		$postId = (int) $this->param( 'post' );
 
 		if ( ! $postId ) {
 			return wp_send_json_error( (object) array( 'message' => 'Invalid template' ), 400 );
 		}
 
-		$apply_for = explode( '_', $_POST['brizy-apply-to'] );
-
-		if ( $apply_for[0] == Brizy_Admin_Rule::TEMPLATE ) {
-			$rule = new Brizy_Admin_Rule( null, (int) $_POST['brizy-rule-type'], (int) $apply_for[0], null, array( $apply_for[1] ) );
-		} else {
-			$rule = new Brizy_Admin_Rule( null, (int) $_POST['brizy-rule-type'], (int) $apply_for[0], $apply_for[1], explode( ',', $_POST['brizy-entities'] ) );
-		}
+		$ruleData = $this->param( 'rule' );
+		$rule = Brizy_Admin_Rule::createFromRequestData($ruleData);
 
 		// validate rule
-		$ruleSet = $this->manager->getAllRulesSet(  );
+		$ruleSet = $this->manager->getAllRulesSet();
 
 		foreach ( $ruleSet->getRules() as $arule ) {
 			if ( $rule->isOverriddenBy( $arule ) ) {
@@ -115,14 +116,10 @@ class Brizy_Admin_Rules_Api {
 
 	public function actionDeleteRule() {
 
-		if ( ! wp_verify_nonce( $_REQUEST['hash'], Brizy_Editor_API::nonce ) ) {
-			wp_send_json_error( (object) array(
-				'message' => 'Invalid request',
-			), 400 );
-		}
+		$this->verifyNonce( self::nonce );
 
-		$postId = (int) $_GET['postId'];
-		$ruleId = $_GET['ruleId'];
+		$postId = (int) $this->param( 'post' );
+		$ruleId = $this->param( 'rule' );
 
 		if ( ! $postId || ! $ruleId ) {
 			wp_send_json_error( null, 400 );

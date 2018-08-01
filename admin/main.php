@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Brizy_Admin_Main {
 
-	public static function _init() {
+	public static function instance() {
 		static $instance;
 
 		if ( ! $instance ) {
@@ -170,7 +170,7 @@ class Brizy_Admin_Main {
 		$new_post_url = add_query_arg( array(
 			'action'    => 'brizy_new_post',
 			'post_type' => $typenow,
-		), set_url_scheme(admin_url( 'edit.php' )) );
+		), set_url_scheme( admin_url( 'edit.php' ) ) );
 
 		?>
         <script type="text/javascript">
@@ -209,26 +209,7 @@ class Brizy_Admin_Main {
 			brizy()->get_slug() . '-select2',
 			'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css'
 		);
-		wp_enqueue_script(
-			brizy()->get_slug() . '-hyperapp-js',
-			brizy()->get_url( 'admin/static/js/hyperapp.js' ),
-			array( 'jquery', 'underscore' ),
-			brizy()->get_version(),
-			true
-		);
 
-		wp_enqueue_script(
-			brizy()->get_slug() . '-select2',
-			'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js',
-			array( 'jquery' )
-		);
-		wp_enqueue_script(
-			brizy()->get_slug() . '-rules',
-			brizy()->get_url( 'admin/static/js/rules.js' ),
-			array( brizy()->get_slug() . '-hyperapp-js' ),
-			brizy()->get_version(),
-			true
-		);
 		wp_enqueue_script(
 			brizy()->get_slug() . '-admin-js',
 			brizy()->get_url( 'admin/static/js/script.js' ),
@@ -241,9 +222,10 @@ class Brizy_Admin_Main {
 			brizy()->get_slug() . '-admin-js',
 			'Brizy_Admin_Data',
 			array(
-				'url'     => set_url_scheme(admin_url( 'admin-ajax.php' )),
-				'id'      => get_the_ID(),
-				'actions' => array(
+				'url'         => set_url_scheme( admin_url( 'admin-ajax.php' ) ),
+				'ruleApiHash' => wp_create_nonce( Brizy_Admin_Rules_Api::nonce ),
+				'id'          => get_the_ID(),
+				'actions'     => array(
 					'enable'  => '_brizy_admin_editor_enable',
 					'disable' => '_brizy_admin_editor_disable',
 				)

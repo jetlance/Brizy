@@ -19,7 +19,7 @@ class Brizy_Admin_Rules_Manager {
 
 		$meta_value = get_post_meta( (int) $postId, 'brizy-template-rules', true );
 
-		if ( is_array($meta_value) && count( $meta_value ) ) {
+		if ( is_array( $meta_value ) && count( $meta_value ) ) {
 			foreach ( $meta_value as $v ) {
 				$rules[] = Brizy_Admin_Rule::createFromSerializedData( $v );
 			}
@@ -93,7 +93,8 @@ class Brizy_Admin_Rules_Manager {
 		$templates = get_posts( array(
 			'post_type'      => Brizy_Admin_Templates::CP_TEMPLATE,
 			'numberposts'    => - 1,
-			'posts_per_page' => - 1
+			'posts_per_page' => - 1,
+			'post_status'    => 'any'
 		) );
 
 		$rules = array();

@@ -7,5 +7,5 @@
  */
 
 interface Brizy_Admin_RuleInterface {
-	public function isGranted( $applied_for, $id = null );
+	public function isGranted( $applyFor, $entityType, $entityValues );
 }

@@ -29,12 +29,13 @@ class Brizy_Admin_RuleSet implements Brizy_Admin_RuleInterface {
 	}
 
 	/**
-	 * @param string $applied_for
-	 * @param null $id
+	 * @param $applyFor
+	 * @param null $entityType
+	 * @param $entityValues
 	 *
 	 * @return bool
 	 */
-	public function isGranted( $applied_for, $id = null ) {
+	public function isGranted( $applyFor, $entityType, $entityValues ) {
 
 		if ( count( $this->rules ) == 0 ) {
 			return false;
@@ -42,7 +43,7 @@ class Brizy_Admin_RuleSet implements Brizy_Admin_RuleInterface {
 
 		foreach ( $this->rules as $rule ) {
 
-			if ( $rule->isGranted( $applied_for, $id ) ) {
+			if ( $rule->isGranted( $applyFor, $entityType, $entityValues ) ) {
 				return true;
 			}
 
