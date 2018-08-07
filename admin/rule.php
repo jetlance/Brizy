@@ -44,6 +44,14 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 	private $entityValues = array();
 
 	/**
+	 * This prop is not going to be serialized.
+	 * Please do not serialize it.
+	 *
+	 * @var int
+	 */
+	private $templateId;
+
+	/**
 	 * @return array|mixed
 	 */
 	public function jsonSerialize() {
@@ -75,8 +83,9 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 	/**
 	 * Return true if the rule matches for the given parameters
 	 *
-	 * @param $applied_for
-	 * @param null $entity
+	 * @param $applyFor
+	 * @param $entityType
+	 * @param $entityValues
 	 *
 	 * @return bool
 	 */
@@ -87,7 +96,9 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 			$this->getAppliedFor(),
 			$this->getEntityType(),
 			$this->getEntityValues(),
-		),function($v) { return !empty($v); } );
+		), function ( $v ) {
+			return ! empty( $v );
+		} );
 
 		$checkValues = array(
 			self::TYPE_INCLUDE,
@@ -96,12 +107,26 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 			$entityValues,
 		);
 
+		// exception for home page that has two behaviors.. as page and as a template
+		$entity_values = $this->getEntityValues();
+
+		if ( $applyFor == self::TEMPLATE &&
+		     $entityType == 'front_page' &&
+		     $this->getAppliedFor() == self::POSTS &&
+		     $this->getEntityType() == 'page' &&
+		     isset( $entity_values[0] ) &&
+		     $entity_values[0] == get_option( 'page_on_front' ) ) {
+			return true;
+		}
+
+
 		foreach ( $ruleValues as $i => $value ) {
 
-			if (  is_array( $value ) ) {
+			if ( is_array( $value ) ) {
 				// this means that the rull accept any value
-				if(count($ruleValues[ $i ])==0)
+				if ( count( $ruleValues[ $i ] ) == 0 ) {
 					return true;
+				}
 
 				// check if the value is contained in this rule
 				if ( count( array_diff( $checkValues[ $i ], $ruleValues[ $i ] ) ) != 0 ) {
@@ -109,6 +134,7 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 				}
 
 			} else {
+
 				if ( $ruleValues[ $i ] != $checkValues[ $i ] ) {
 					return false;
 				}
@@ -116,6 +142,18 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 		}
 
 		return true;
+	}
+
+	/**
+	 * @param Brizy_Admin_Rule $rule
+	 *
+	 * @return bool
+	 */
+	public function isEqual( $rule ) {
+		return $this->getType() == $rule->getType() &&
+		       $this->getAppliedFor() == $rule->getAppliedFor() &&
+		       $this->getEntityType() == $rule->getEntityType() &&
+		       ( count( $rule->getEntityValues() ) == count( $this->getEntityValues() ) || count( array_diff( $rule->getEntityValues(), $this->getEntityValues() ) ) == 0 );
 	}
 
 	/**
@@ -227,6 +265,35 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 		);
 	}
 
+
+	public function getRuleWeight() {
+
+
+		if ( $this->getAppliedFor() == self::TEMPLATE && $this->getEntityType() == 'front_page' ) {
+			return 6;
+		}
+		if ( $this->getAppliedFor() == self::TEMPLATE ) {
+			return 5;
+		}
+
+		$values = array();
+
+		if ( $this->getType() ) {
+			$values[] = $this->getType();
+		}
+		if ( $this->getAppliedFor() ) {
+			$values[] = $this->getAppliedFor();
+		}
+		if ( $this->getEntityType() ) {
+			$values[] = $this->getEntityType();
+		}
+		if ( count( $this->getEntityValues() ) > 0 ) {
+			$values[] = $this->getEntityType();
+		}
+
+		return count( $values );
+	}
+
 	/**
 	 * @param $data
 	 *
@@ -257,18 +324,6 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 		);
 	}
 
-	/**
-	 * @param Brizy_Admin_Rule $rule
-	 *
-	 * @return bool
-	 */
-	public function isOverriddenBy( $rule ) {
-
-		return $this->getType() == $rule->getType() &&
-		       $this->getAppliedFor() == $rule->getAppliedFor() &&
-		       $this->getEntityType() == $rule->getEntityType() &&
-		       ( count( $rule->getEntityValues() ) || count( array_diff( $rule->getEntityValues(), $this->getEntityValues() ) ) == 0 );
-	}
 
 	/**
 	 * @param string $delimited
@@ -286,4 +341,21 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 		return md5( implode( '', func_get_args() ) );
 	}
 
+	/**
+	 * @return int
+	 */
+	public function getTemplateId() {
+		return $this->templateId;
+	}
+
+	/**
+	 * @param int $templateId
+	 *
+	 * @return Brizy_Admin_Rule
+	 */
+	public function setTemplateId( $templateId ) {
+		$this->templateId = $templateId;
+
+		return $this;
+	}
 }

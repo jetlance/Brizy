@@ -92,17 +92,11 @@ class Brizy_Admin_Rules_Api extends Brizy_Admin_AbstractApi {
 		$ruleSet = $this->manager->getAllRulesSet();
 
 		foreach ( $ruleSet->getRules() as $arule ) {
-			if ( $rule->isOverriddenBy( $arule ) ) {
-				wp_send_json_error( (object) array(
-					'message' => 'The rule is overridden by an existing rule',
-					'rule'    => $arule->getId()
-				), 400 );
-			}
 
-			if ( $arule->isOverriddenBy( $rule ) ) {
+			if($rule->isEqual($arule)) {
 				wp_send_json_error( (object) array(
-					'message' => 'This rule will override an existing rule',
-					'rule'    => $rule->getId()
+					'message' => 'The rule is already used in one template',
+					'rule'    => $arule->getId()
 				), 400 );
 			}
 		}

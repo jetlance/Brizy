@@ -21,7 +21,9 @@ class Brizy_Admin_Rules_Manager {
 
 		if ( is_array( $meta_value ) && count( $meta_value ) ) {
 			foreach ( $meta_value as $v ) {
-				$rules[] = Brizy_Admin_Rule::createFromSerializedData( $v );
+				$brizy_admin_rule = Brizy_Admin_Rule::createFromSerializedData( $v );
+				$brizy_admin_rule->setTemplateId( $postId );
+				$rules[] = $brizy_admin_rule;
 			}
 		}
 
@@ -103,6 +105,23 @@ class Brizy_Admin_Rules_Manager {
 			$tRules = $this->getRules( $template->ID );
 			$rules  = array_merge( $rules, $tRules );
 		}
+
+		// sort the rules by how specific they are
+		usort( $rules, function ( $a, $b ) {
+			/**
+			 * @var Brizy_Admin_Rule $a ;
+			 * @var Brizy_Admin_Rule $b ;
+			 */
+
+			$la = $a->getRuleWeight();
+			$lb = $b->getRuleWeight();
+			if ( $lb == $la ) {
+				return 0;
+			}
+
+			return $la < $lb ? 1 : - 1;
+		} );
+
 
 		$ruleSet = new Brizy_Admin_RuleSet( $rules );
 

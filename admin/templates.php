@@ -352,12 +352,6 @@ class Brizy_Admin_Templates {
 	 */
 	public function getTemplateForCurrentPage() {
 
-		$templates = get_posts( array(
-			'post_type'      => self::CP_TEMPLATE,
-			'numberposts'    => - 1,
-			'posts_per_page' => - 1
-		) );
-
 		global $wp_query;
 
 		if ( ! isset( $wp_query ) ) {
@@ -392,17 +386,17 @@ class Brizy_Admin_Templates {
 			return null;
 		}
 
-		foreach ( $templates as $template ) {
-			$ruleSet     = $this->ruleManager->getRuleSet( $template->ID );
-			$currentPost = null;
 
-			if ( $ruleSet->isGranted( $applyFor, $entityType, $entityValues ) ) {
-				// use the template here
-				return Brizy_Editor_Post::get( $template->ID );
+		$allRuleSet = $this->ruleManager->getAllRulesSet();
+		$template   = null;
+		foreach ( $allRuleSet->getRules() as $rule ) {
+			if ( $rule->isGranted( $applyFor, $entityType, $entityValues ) ) {
+				$template = Brizy_Editor_Post::get( $rule->getTemplateId() );
+				break;
 			}
 		}
 
-		return null;
+		return $template;
 	}
 
 	public function templateFrontEnd() {
