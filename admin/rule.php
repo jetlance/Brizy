@@ -153,7 +153,7 @@ class Brizy_Admin_Rule extends Brizy_Admin_Serializable implements Brizy_Admin_R
 		return $this->getType() == $rule->getType() &&
 		       $this->getAppliedFor() == $rule->getAppliedFor() &&
 		       $this->getEntityType() == $rule->getEntityType() &&
-		       ( count( $rule->getEntityValues() ) == count( $this->getEntityValues() ) || count( array_diff( $rule->getEntityValues(), $this->getEntityValues() ) ) == 0 );
+		       ( count( $rule->getEntityValues() ) == count( $this->getEntityValues() ) && count( array_diff( $rule->getEntityValues(), $this->getEntityValues() ) ) == 0 );
 	}
 
 	/**
