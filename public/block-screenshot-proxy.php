@@ -35,17 +35,18 @@ class Brizy_Public_BlockScreenshotProxy extends Brizy_Public_AbstractProxy {
 
 		// Check if user is not querying API
 		if ( $vars[ self::ENDPOINT_BLOCK_TYPE ] == 'normal' ) {
-			if(! isset( $vars[ self::ENDPOINT_POST ] ) || ! is_numeric( $vars[ self::ENDPOINT_POST ] ))
+			if ( ! isset( $vars[ self::ENDPOINT_POST ] ) || ! is_numeric( $vars[ self::ENDPOINT_POST ] ) ) {
 				return;
+			}
 		}
 
 		$blockName = $vars[ self::ENDPOINT ];
 		$blockType = $vars[ self::ENDPOINT_BLOCK_TYPE ];
-		$blockPost = isset($vars[ self::ENDPOINT_POST ])?$vars[ self::ENDPOINT_POST ]:null;
+		$blockPost = isset( $vars[ self::ENDPOINT_POST ] ) ? $vars[ self::ENDPOINT_POST ] : null;
 
 		$filePath = $this->getBlockScreenshotPath( $blockName, $blockType, $blockPost );
 
-		$this->send_file($filePath);
+		$this->send_file( $filePath );
 
 		return;
 	}
@@ -59,13 +60,13 @@ class Brizy_Public_BlockScreenshotProxy extends Brizy_Public_AbstractProxy {
 	 * @throws Brizy_Editor_Exceptions_NotFound
 	 */
 	private function getBlockScreenshotPath( $blockName, $blockType, $blockPost ) {
-		$brizyPost = Brizy_Editor_Post::get( $blockPost );
-		$this->urlBuilder->set_post( $brizyPost );
 		$folderPath = null;
 
 		switch ( $blockType ) {
 			default:
 			case Brizy_Editor_BlockScreenshotApi::BLOCK_TYPE_NORMAL:
+				$brizyPost = Brizy_Editor_Post::get( $blockPost );
+				$this->urlBuilder->set_post( $brizyPost );
 				$folderPath = $this->urlBuilder->page_upload_path( 'blockThumbnails' );
 				break;
 			case Brizy_Editor_BlockScreenshotApi::BLOCK_TYPE_GLOBAL:
@@ -74,14 +75,15 @@ class Brizy_Public_BlockScreenshotProxy extends Brizy_Public_AbstractProxy {
 			case Brizy_Editor_BlockScreenshotApi::BLOCK_TYPE_SAVED:
 				$folderPath = $this->urlBuilder->brizy_upload_path( 'blockThumbnails' . DIRECTORY_SEPARATOR . 'saved' );
 				break;
-
+			default:
+				return null;
 		}
 
-		$globStr         = $folderPath . DIRECTORY_SEPARATOR . "{$blockName}.*";
-		$screenshors = glob( $globStr );
+		$globStr     = $folderPath . DIRECTORY_SEPARATOR . "{$blockName}.*";
+		$screenshots = glob( $globStr );
 
-		if ( count( $screenshors ) == 1 ) {
-			return $screenshors[0];
+		if ( count( $screenshots ) == 1 ) {
+			return $screenshots[0];
 		}
 
 		return null;

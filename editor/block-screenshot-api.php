@@ -187,47 +187,4 @@ class Brizy_Editor_BlockScreenshotApi {
 		return file_put_contents( $thumbnailFullPath, $content ) !== false;
 	}
 
-//	public function load_block_screenshot() {
-//
-//		if ( empty( $_GET['block_id'] ) || empty( $_GET['block_type'] ) || in_array( $_GET['block_type'], self::BLOCK_TYPES ) ) {
-//			wp_send_json( array(
-//				'success' => false,
-//				'message' => esc_html__( 'There are no all required GET variables', 'brizy' )
-//			) );
-//		}
-//
-//		$path = $this->get_dir( $_GET ) . sanitize_file_name( "{$_GET['block_id']}.jpg" );
-//
-//		if ( ! file_exists( $path ) ) {
-//			wp_send_json( array(
-//				'success' => false,
-//				'message' => esc_html__( 'The screenshot of the block does not exist.', 'brizy' )
-//			) );
-//		}
-//
-//		wp_send_json( array( 'success' => true, 'path' => $path, 'block_id' => $_GET['block_id'] ) );
-//	}
-//
-//	private function get_dir( $arr ) {
-//		$block_type = $arr['block_type'];
-//
-//		if ( in_array( $block_type, self::BLOCK_TYPES ) ) {
-//			$dir = "{$block_type}-blocks";
-//		} else {
-//			if ( empty( $arr['post_id'] ) || ! is_numeric( $arr['post_id'] ) ) {
-//				wp_send_json( array(
-//					'success' => false,
-//					'message' => esc_html__( 'Wrong ID of the post.', 'brizy' )
-//				) );
-//			}
-//
-//			$dir = $arr['post_id'];
-//		}
-//
-//		return Brizy_Editor_UploadsDir::get_path() . implode( DIRECTORY_SEPARATOR, array(
-//				$dir,
-//				'assets',
-//				'thumbnails'
-//			) ) . DIRECTORY_SEPARATOR;
-//	}
 }
