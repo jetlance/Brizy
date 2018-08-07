@@ -63,7 +63,6 @@ class Brizy_Public_BlockScreenshotProxy extends Brizy_Public_AbstractProxy {
 		$folderPath = null;
 
 		switch ( $blockType ) {
-			default:
 			case Brizy_Editor_BlockScreenshotApi::BLOCK_TYPE_NORMAL:
 				$brizyPost = Brizy_Editor_Post::get( $blockPost );
 				$this->urlBuilder->set_post( $brizyPost );
